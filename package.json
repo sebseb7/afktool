@@ -1,6 +1,6 @@
 {
   "name": "afktool",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -66,6 +66,7 @@
     "concurrently": "^8.2.2",
     "electron": "^27.1.0",
     "electron-builder": "^24.6.4",
-    "wait-on": "^7.2.0"
+    "wait-on": "^7.2.0",
+	"@babel/plugin-proposal-private-property-in-object": "*"
   }
 }
