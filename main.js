@@ -13,6 +13,8 @@ const store = new Store();
 var counter = 1;
 var bot;
 
+var settings = {damage_logout:false,hold_use:false};
+
 function createWindow() {
   let host = store.get('host');
   let port = store.get('port');
@@ -80,6 +82,8 @@ function createWindow() {
 	bot.on('spawn', () =>{
   	  win.webContents.send('log', 'logged in');
 	  win.webContents.send('players',Object.keys(bot.players));
+	  win.webContents.send('health',bot.health,bot.food);
+	  win.webContents.send('position',bot.entity.position);
 	})
 	bot.on('kicked', (msg) =>{
   	  win.webContents.send('log', 'kicked: '+msg);
@@ -99,7 +103,24 @@ function createWindow() {
     bot.on('whisper', (username, message) => {
       if (username === bot.username) return
     })
+    bot.on('death', () => {
+		if(settings.damage_logout){
+	  		win.webContents.send('log', 'death logout');
+  			bot.quit();
+		}
+    })
+    bot.on('move', () => {
+	  	win.webContents.send('position',bot.entity.position);
+    })
+    bot.on('forcedMove', () => {
+	  	win.webContents.send('position',bot.entity.position);
+    })
     bot.on('health', () => {
+	  	win.webContents.send('health',bot.health,bot.food);
+		if(settings.damage_logout && (bot.health < 4)){
+	  		win.webContents.send('log', 'health logout');
+  			bot.quit();
+		}
     })
     bot.on('playerJoined', () => {
 	  	win.webContents.send('players',Object.keys(bot.players));
@@ -127,7 +148,14 @@ function createWindow() {
 	}else{
 		bot.whisper(msg[0],msg[1]);
 	}
-  	console.log(event,msg);
+  });
+  ipcMain.handle('state', (event,msg) => {
+  	if(msg[0] == 'hold_use'){
+		if(msg[1]){
+		}else{
+		}
+	}
+  	settings[msg[0]]=msg[1];
   });
 }
 

@@ -13,6 +13,15 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
+
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableRow from '@mui/material/TableRow';
+
 const darkTheme = createTheme({
   palette: {
     mode: 'dark',
@@ -68,7 +77,12 @@ export default class App extends React.Component {
 		toPlayer:'_all',
 		versions:[],
 		version:'',
-		chatmsg:''
+		chatmsg:'',
+		health:'',
+		hunger:'',
+		position:'',
+		settings_damage_logout:false,
+		settings_hold_use:false
 	};
 	console.log('constructor');
   }
@@ -87,6 +101,12 @@ export default class App extends React.Component {
 	})
 	window.ipcApi.handleLink((event, value) => {
 		window.ipcApi.browser(value);
+	})
+	window.ipcApi.handlePosition((event, value) => {
+		this.setState({position:Math.round(value.x*100)/100+' '+Math.round(value.y*100)/100+' '+Math.round(value.z*100)/100})
+	})
+	window.ipcApi.handleHealth((event, value,value2) => {
+		this.setState({health:Math.round(value),hunger:Math.round(value2)})
 	})
 	window.ipcApi.handlePlayers((event, value) => {
 		this.setState({players:value});
@@ -110,6 +130,14 @@ export default class App extends React.Component {
   }
   handleChatmsgChange(event,ref){
 	this.setState({chatmsg:event.target.value});
+  }
+  handleSettingsDamageLogoutChange(event){
+  	this.setState({settings_damage_logout:event.target.checked});
+	window.ipcApi.state('damage_logout',event.target.checked);
+  }
+  handleSettingsHoldUseChange(event){
+  	this.setState({settings_hold_use:event.target.checked});
+	window.ipcApi.state('hold_use',event.target.checked);
   }
 
   render() { return(
@@ -155,7 +183,9 @@ export default class App extends React.Component {
 
 
       </div>
-	  <div style={{marginTop:'0px',width:'100%'}}>
+      
+	  <Grid container spacing={2}>
+        <Grid item xs="8">
 	  
 	  <List
       sx={{
@@ -180,6 +210,32 @@ export default class App extends React.Component {
           </ul>
         </li>
     </List>
+		</Grid>
+        <Grid item xs="4">
+		    <FormGroup>
+      			<FormControlLabel checked={this.state.settings_damage_logout} onChange={(event)=>{this.handleSettingsDamageLogoutChange(event)}} control={<Switch/>} label="Logout on low health" />
+    		</FormGroup>	
+
+      <Table size="small">
+        <TableBody>
+            <TableRow key="health" sx={{ 'th,td': { border: 0 } }}>
+              <TableCell component="th" scope="row">Health</TableCell>
+              <TableCell align="right">{this.state.health}</TableCell>
+            </TableRow>
+            <TableRow key="hunger" sx={{ 'th,td': { border: 0 } }}>
+              <TableCell component="th" scope="row">Hunger</TableCell>
+              <TableCell align="right">{this.state.hunger}</TableCell>
+            </TableRow>
+            <TableRow key="position" sx={{ 'td,th': { border: 0 } }}>
+              <TableCell component="th" scope="row">Position</TableCell>
+              <TableCell align="right">{this.state.position}</TableCell>
+            </TableRow>
+        </TableBody>
+      </Table>
+
+		</Grid>
+	</Grid>
+
       <div id="footer" style={{padding:'20px'}}>
       
 	  <Grid container spacing={2}>
@@ -201,7 +257,7 @@ export default class App extends React.Component {
 		  </FormControl>
         </Grid>
         <Grid item xs="auto">
-	  	  <TextField fullWidth InputLabelProps={{ shrink: true }} id="chatmsg" value={this.state.chatmsg} onChange={(event) => {this.handleChatmsgChange(event,this)}} label="Chatmsg" variant="outlined" size="small"/>
+	  	  <TextField   onKeyPress={(e) => { if (e.key === 'Enter') { onChatButton(this) }}} fullWidth InputLabelProps={{ shrink: true }} id="chatmsg" value={this.state.chatmsg} onChange={(event) => {this.handleChatmsgChange(event,this)}} label="Chatmsg" variant="outlined" size="small"/>
         </Grid>
         <Grid item xs="auto">
           <Button onClick={()=>{onChatButton(this)}} variant="contained">Send</Button>
@@ -210,7 +266,6 @@ export default class App extends React.Component {
 	  </div>
 
 
-	  </div>
     </div>
     </ThemeProvider>
   )};

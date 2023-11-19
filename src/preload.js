@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('ipcApi', {
 	login: (username,password,version) => {ipcRenderer.invoke('login',[username,password,version])},
 	chat: (username,message) => {ipcRenderer.invoke('chat',[username,message])},
+	state: (name,value) => {ipcRenderer.invoke('state',[name,value])},
 	versions: () => ipcRenderer.invoke('versions'),
 	logout: () => ipcRenderer.invoke('logout'),
 	reauth: () => ipcRenderer.invoke('reauth'),
@@ -21,6 +22,14 @@ contextBridge.exposeInMainWorld('ipcApi', {
 	handleLink: (callback) => {
 		ipcRenderer.removeAllListeners('link');
 		return ipcRenderer.on('link', callback)
+	},
+	handlePosition: (callback) => {
+		ipcRenderer.removeAllListeners('position');
+		return ipcRenderer.on('position', callback)
+	},
+	handleHealth: (callback) => {
+		ipcRenderer.removeAllListeners('health');
+		return ipcRenderer.on('health', callback)
 	},
 	argv: window.process.argv
 })
