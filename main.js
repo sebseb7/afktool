@@ -6,7 +6,7 @@ const isDev = require('electron-is-dev');
 const {app, BrowserWindow, ipcMain} = require('electron')
 const { v4: uuidv4 } = require('uuid');
 const {loader} = require("@nxg-org/mineflayer-smooth-look");
-
+const mc = require('minecraft-protocol');
 const store = new Store();
 
 
@@ -21,7 +21,7 @@ function createWindow() {
 
   const win = new BrowserWindow({
     autoHideMenuBar: true,
-    width: 830,
+    width: 1000,
     height: 600,
 	minWidth:500,
 	minHeight:500,
@@ -45,35 +45,35 @@ function createWindow() {
   if (isDev) {
     win.webContents.openDevTools({ mode: 'detach' });
   }
+  
+  ipcMain.handle('versions', (event, msg) => {
+    console.log('versions');
+    return mc.supportedVersions;
+  })
 
   ipcMain.handle('login', (event,msg) => {
 	let uuid = store.get('uuid');
+
 	if(! uuid){
 		uuid = uuidv4();
 		store.set('uuid',uuid);
 	}
 	store.set('host', msg[0]);
 	store.set('port', msg[1]);
+
     bot = mineflayer.createBot({
       host: msg[0], // minecraft server ip
       username: uuid, // minecraft username
       port: msg[1],                // only set if you need a port that isn't 25565
+      version: msg[2],
       auth: 'microsoft' ,             // only set if you need microsoft auth, then set this to 'microsoft'
 	  onMsaCode: (msg) => {
 	  	win.webContents.send('log','use this auth code: '+msg.user_code);
 	  	win.webContents.send('link',msg.verification_uri);
 	  },
-      //version: "1.19.3"
     });
 	bot.on('spawn', () =>{
   	  win.webContents.send('log', 'logged in');
-	  //console.log(bot.entities);
-	  for(const entityid of Object.keys(bot.entities)){
-	  	const entity = bot.entities[entityid];
-		if((entity.username == '[ZNPC] 134648')||(entity.uuid == '0fe81c39-c7f4-486a-8ce1-be413e8561d9')){
-      	  bot.activateEntity(entity);
-		}
-	  }
 	})
 	bot.on('kicked', (msg) =>{
   	  win.webContents.send('log', 'kicked: '+msg);

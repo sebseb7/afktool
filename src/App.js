@@ -8,9 +8,13 @@ import ListItemText from '@mui/material/ListItemText';
 import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Link from '@mui/material/Link';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 
-function onLoginButton(){
-	window.ipcApi.login(document.getElementById('hostname').value,document.getElementById('port').value);
+function onLoginButton(state){
+	window.ipcApi.login(document.getElementById('hostname').value,document.getElementById('port').value,state.version);
 }
 function onLogoutButton(){
 	window.ipcApi.logout();
@@ -46,12 +50,14 @@ export default class App extends React.Component {
   	super(props);
   	this.state = {
 		height:600,
-		list:[]
+		list:[],
+		versions:[],
+		version:''
 	};
 	console.log('constructor');
   }
  
-  componentDidMount() {
+  async componentDidMount() {
     const setState = this.setState.bind(this);
     window.addEventListener("resize", function(){resizeWindow(setState)});
     resizeWindow(setState);
@@ -66,10 +72,17 @@ export default class App extends React.Component {
 	window.ipcApi.handleLink((event, value) => {
 		window.ipcApi.browser(value);
 	})
+	const versions = await window.ipcApi.versions();
+	this.setState({versions:versions,version:'1.20.1'});
   }
   componentWillUnmount() {
   	console.log('will unmount');
   }
+
+  handleVersionChange(event,ref){
+	this.setState({version:event.target.value});
+  }
+
   render() { return(
     <div style={{padding:'0px'}}>
 	  <CssBaseline/>
@@ -84,7 +97,23 @@ export default class App extends React.Component {
 	  	  <TextField id="port" label="Port" defaultValue={minecraftport} variant="outlined" size="small"/>
         </Grid>
         <Grid item xs="auto">
-          <Button onClick={onLoginButton} variant="contained">Login</Button>
+		<FormControl size="small">
+          <InputLabel id="select-label">Version</InputLabel>
+	      <Select
+    		labelId="select-label"
+    		label="Version"
+			id="version"
+			value={this.state.version}
+			onChange={(event) => {this.handleVersionChange(event, this)}}
+  		  >
+		  	{this.state.versions.map((line, i) => (
+				<MenuItem value={line}>{line}</MenuItem>
+			))}
+		  </Select>
+		  </FormControl>
+		</Grid>
+        <Grid item xs="auto">
+          <Button onClick={()=>{onLoginButton(this.state)}} variant="contained">Login</Button>
         </Grid>
         <Grid item xs="auto">
           <Button onClick={onLogoutButton} variant="contained">Logout</Button>
@@ -97,7 +126,7 @@ export default class App extends React.Component {
 
       </div>
 	  <div style={{marginTop:'0px',width:'100%'}}>
-
+	  
 	  <List
       sx={{
         width: '100%',

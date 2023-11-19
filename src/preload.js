@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('ipcApi', {
-	login: (username,password) => {ipcRenderer.invoke('login',[username,password])},
+	login: (username,password,version) => {ipcRenderer.invoke('login',[username,password,version])},
+	versions: () => ipcRenderer.invoke('versions'),
 	logout: () => ipcRenderer.invoke('logout'),
 	reauth: () => ipcRenderer.invoke('reauth'),
 	browser: (url) => {
