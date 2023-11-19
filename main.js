@@ -25,11 +25,16 @@ function createWindow() {
     height: 600,
 	minWidth:500,
 	minHeight:500,
+	backgroundColor: '#121212',
+	show: false,
     webPreferences: {
       nodeIntegration: true,
 	  preload: path.join(__dirname, 'src','preload.js'),
 	  additionalArguments: ['minecrafthost='+host,'minecraftport='+port]
     },
+  });
+  win.once('ready-to-show', () => {
+    win.show()
   });
 
   win.loadURL(
@@ -74,6 +79,7 @@ function createWindow() {
     });
 	bot.on('spawn', () =>{
   	  win.webContents.send('log', 'logged in');
+	  win.webContents.send('players',Object.keys(bot.players));
 	})
 	bot.on('kicked', (msg) =>{
   	  win.webContents.send('log', 'kicked: '+msg);
@@ -84,16 +90,28 @@ function createWindow() {
 	bot.on('end', (msg) =>{
   	  win.webContents.send('log', 'end: '+msg);
 	})
-    bot.on('message', (message) => {
-  	  win.webContents.send('log', 'msg: '+message);
+    bot.on('message', (message,pos,sender) => {
+	  win.webContents.send('log', message.toHTML());
     })
-    bot.on('chat', (username, message) => {
-      if (username === bot.username) return
-  	  win.webContents.send('log', '['+username+'] '+message);
+    bot.on('chat', (username, message,translate,jsonMsg) => {
+	  if (username === bot.username) return;
     })
     bot.on('whisper', (username, message) => {
       if (username === bot.username) return
-  	  win.webContents.send('log', '['+username+'] [whispers] '+message);
+    })
+    bot.on('health', () => {
+    })
+    bot.on('playerJoined', () => {
+	  	win.webContents.send('players',Object.keys(bot.players));
+    })
+    bot.on('playerLeft', () => {
+	  	win.webContents.send('players',Object.keys(bot.players));
+    })
+    bot.on('soundEffectHeard', (soundName) => {
+	  //win.webContents.send('log', 'sound '+soundName);
+    })
+    bot.on('hardcodedSoundEffectHeard', (soundId,soundCategory) => {
+	  //win.webContents.send('log', 'soundid '+soundId+':'+soundCategory);
     })
   });
   ipcMain.handle('logout', () => {
@@ -102,6 +120,14 @@ function createWindow() {
   ipcMain.handle('reauth', () => {
 	let uuid = uuidv4();
 	store.set('uuid',uuid);
+  });
+  ipcMain.handle('chat', (event,msg) => {
+    if(msg[0] == '_all'){
+		bot.chat(msg[1]);
+	}else{
+		bot.whisper(msg[0],msg[1]);
+	}
+  	console.log(event,msg);
   });
 }
 
