@@ -37,7 +37,6 @@ function onChatButton(ctx){
 	ctx.setState({chatmsg:'',tabs:[]});
 }
 async function onChatTab(ctx){
-	console.log('tab');
 	if(ctx.state.chatmsg === '') return;
 	const tabs = await window.ipcApi.tab(ctx.state.chatmsg);
 	let prefix = ctx.state.chatmsg;
@@ -53,7 +52,6 @@ async function onChatTab(ctx){
 			if(prefix !== ctx.state.chatmsg) prefix += ' ';
 		}
 	}
-	//console.log(tabs.map((a) => prefix+a.match));
 	ctx.setState({tabs:tabs.map((a) => prefix+a.match)});
 }
 function onLoginButton(state){
@@ -107,7 +105,6 @@ export default class App extends React.Component {
 		settings_damage_logout:false,
 		settings_hold_use:false
 	};
-	console.log('constructor');
   }
  
   async componentDidMount() {
@@ -115,7 +112,6 @@ export default class App extends React.Component {
     window.addEventListener("resize", function(){resizeWindow(setState)});
     resizeWindow(setState);
 
-    console.log('did mount');
 	window.ipcApi.handleLog((event, value) => {
 		let list = this.state.list;
 		list.unshift({type:'log',value:reactParse(value)});
@@ -141,7 +137,6 @@ export default class App extends React.Component {
 	this.setState({versions:versions,version:'1.20.1'});
   }
   componentWillUnmount() {
-  	console.log('will unmount');
   }
 
   handleVersionChange(event,ref){
@@ -153,17 +148,15 @@ export default class App extends React.Component {
   }
   handleChatmsgChange(event,ref){
 	if(!event || !event.target) return;
-	console.log('change',event,ref);
 	if(event.type === 'click'){
-		this.setState({chatmsg:event.target.innerText});
+		this.setState({chatmsg:event.target.innerText,tabs:[]});
 		return;
 	}
 	if(event.type === 'keydown'){
-		this.setState({chatmsg:event.target.value});
-		//console.log('kd',event.target.value);
+		this.setState({chatmsg:event.target.value,tabs:[]});
 		return;
 	}
-	this.setState({chatmsg:event.target.value});
+	this.setState({chatmsg:event.target.value,tabs:[]});
   }
   handleSettingsDamageLogoutChange(event){
   	this.setState({settings_damage_logout:event.target.checked});

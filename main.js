@@ -150,8 +150,11 @@ function createWindow() {
 	}
   });
   ipcMain.handle('tab', async (event,msg) => {
-  	const res = await bot.tabComplete(msg);
-	return res;
+  	if(bot){
+		const res = await bot.tabComplete(msg);
+		return res;
+	}
+	return [];
   });
   ipcMain.handle('state', (event,msg) => {
   	if(msg[0] == 'hold_use'){
