@@ -149,6 +149,10 @@ function createWindow() {
 		bot.whisper(msg[0],msg[1]);
 	}
   });
+  ipcMain.handle('tab', async (event,msg) => {
+  	const res = await bot.tabComplete(msg);
+	return res;
+  });
   ipcMain.handle('state', (event,msg) => {
   	if(msg[0] == 'hold_use'){
 		if(msg[1]){

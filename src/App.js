@@ -13,6 +13,8 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 
+import Autocomplete from '@mui/material/Autocomplete';
+
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
@@ -32,7 +34,27 @@ const reactParse = require('html-react-parser').default;
 
 function onChatButton(ctx){
 	window.ipcApi.chat(ctx.state.toPlayer,ctx.state.chatmsg);
-	ctx.setState({chatmsg:''});
+	ctx.setState({chatmsg:'',tabs:[]});
+}
+async function onChatTab(ctx){
+	console.log('tab');
+	if(ctx.state.chatmsg === '') return;
+	const tabs = await window.ipcApi.tab(ctx.state.chatmsg);
+	let prefix = ctx.state.chatmsg;
+	if(prefix.slice(-1) === ' '){
+		
+	}else{
+		let tmp = prefix.split(' ');
+		tmp.pop();
+		prefix = tmp.join(' ');
+		if(prefix === '') {
+			prefix = '/'
+		}else{
+			if(prefix !== ctx.state.chatmsg) prefix += ' ';
+		}
+	}
+	//console.log(tabs.map((a) => prefix+a.match));
+	ctx.setState({tabs:tabs.map((a) => prefix+a.match)});
 }
 function onLoginButton(state){
 	window.ipcApi.login(document.getElementById('hostname').value,document.getElementById('port').value,state.version);
@@ -81,6 +103,7 @@ export default class App extends React.Component {
 		health:'',
 		hunger:'',
 		position:'',
+		tabs:[],
 		settings_damage_logout:false,
 		settings_hold_use:false
 	};
@@ -129,6 +152,17 @@ export default class App extends React.Component {
 	//state.setState({chatmsg:''});
   }
   handleChatmsgChange(event,ref){
+	if(!event || !event.target) return;
+	console.log('change',event,ref);
+	if(event.type === 'click'){
+		this.setState({chatmsg:event.target.innerText});
+		return;
+	}
+	if(event.type === 'keydown'){
+		this.setState({chatmsg:event.target.value});
+		//console.log('kd',event.target.value);
+		return;
+	}
 	this.setState({chatmsg:event.target.value});
   }
   handleSettingsDamageLogoutChange(event){
@@ -256,8 +290,9 @@ export default class App extends React.Component {
 		  </Select>
 		  </FormControl>
         </Grid>
-        <Grid item xs="auto">
-	  	  <TextField   onKeyPress={(e) => { if (e.key === 'Enter') { onChatButton(this) }}} fullWidth InputLabelProps={{ shrink: true }} id="chatmsg" value={this.state.chatmsg} onChange={(event) => {this.handleChatmsgChange(event,this)}} label="Chatmsg" variant="outlined" size="small"/>
+        <Grid item xs="9">
+	  	  <Autocomplete id="chatmsg" sx={{width: '100%'}} options={this.state.tabs} freeSolo onKeyPress={(e) => { if (e.key === 'Enter') { onChatButton(this) }}} onKeyDown={(e) => { if (e.key === 'Tab') { e.preventDefault();onChatTab(this); }}} value={this.state.chatmsg} onChange={(event) => {this.handleChatmsgChange(event,this)}}  onInputChange={(event) => {this.handleChatmsgChange(event,this)}} renderInput={(params) => <TextField  {...params} fullWidth InputLabelProps={{ shrink: true }} label="Chatmsg" variant="outlined" size="small"/>}
+		  />
         </Grid>
         <Grid item xs="auto">
           <Button onClick={()=>{onChatButton(this)}} variant="contained">Send</Button>

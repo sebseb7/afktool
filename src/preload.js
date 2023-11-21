@@ -1,8 +1,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+globalThis.isElectron = true;
+
 contextBridge.exposeInMainWorld('ipcApi', {
 	login: (username,password,version) => {ipcRenderer.invoke('login',[username,password,version])},
 	chat: (username,message) => {ipcRenderer.invoke('chat',[username,message])},
+	tab: (message) => ipcRenderer.invoke('tab',message),
 	state: (name,value) => {ipcRenderer.invoke('state',[name,value])},
 	versions: () => ipcRenderer.invoke('versions'),
 	logout: () => ipcRenderer.invoke('logout'),
