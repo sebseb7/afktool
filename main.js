@@ -8,12 +8,12 @@ const { v4: uuidv4 } = require('uuid');
 const {loader} = require("@nxg-org/mineflayer-smooth-look");
 const mc = require('minecraft-protocol');
 const store = new Store();
-
+const autoeat = require('mineflayer-auto-eat').plugin;
 
 var counter = 1;
 var bot;
 
-var settings = {damage_logout:false,hold_use:false};
+var settings = {damage_logout:false,hold_use:false,auto_eat:false};
 
 function createWindow() {
   let host = store.get('host');
@@ -79,11 +79,18 @@ function createWindow() {
 	  	win.webContents.send('link',msg.verification_uri);
 	  },
     });
+	bot.loadPlugin(autoeat);
+
 	bot.on('spawn', () =>{
   	  win.webContents.send('log', 'logged in');
 	  win.webContents.send('players',Object.keys(bot.players));
 	  win.webContents.send('health',bot.health,bot.food);
 	  win.webContents.send('position',bot.entity.position);
+	  if(settings.auto_eat){
+	  	bot.autoEat.enable();
+	  }else{
+	  	bot.autoEat.disable();
+	  }
 	})
 	bot.on('kicked', (msg) =>{
   	  win.webContents.send('log', 'kicked: '+msg);
@@ -160,6 +167,13 @@ function createWindow() {
   	if(msg[0] == 'hold_use'){
 		if(msg[1]){
 		}else{
+		}
+	}
+  	if(msg[0] == 'auto_eat'){
+		if(msg[1]){
+	  		bot.autoEat.enable();
+	  	}else{
+	  		bot.autoEat.disable();
 		}
 	}
   	settings[msg[0]]=msg[1];

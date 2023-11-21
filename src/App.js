@@ -34,6 +34,12 @@ const reactParse = require('html-react-parser').default;
 
 function onChatButton(ctx){
 	window.ipcApi.chat(ctx.state.toPlayer,ctx.state.chatmsg);
+	if(ctx.state.chatmsg.startsWith('/')){
+		let list = ctx.state.list;
+		list.unshift({type:'log',value:'[CMD] '+ctx.state.chatmsg});
+		if(list.length>200) list.pop();
+		ctx.setState({list:list});
+	}
 	ctx.setState({chatmsg:'',tabs:[]});
 }
 async function onChatTab(ctx){
@@ -103,7 +109,8 @@ export default class App extends React.Component {
 		position:'',
 		tabs:[],
 		settings_damage_logout:false,
-		settings_hold_use:false
+		settings_hold_use:false,
+		settings_auto_eat:false
 	};
   }
  
@@ -165,6 +172,10 @@ export default class App extends React.Component {
   handleSettingsHoldUseChange(event){
   	this.setState({settings_hold_use:event.target.checked});
 	window.ipcApi.state('hold_use',event.target.checked);
+  }
+  handleSettingsAutoEatChange(event){
+  	this.setState({settings_auto_eat:event.target.checked});
+	window.ipcApi.state('auto_eat',event.target.checked);
   }
 
   render() { return(
@@ -241,6 +252,7 @@ export default class App extends React.Component {
         <Grid item xs="4">
 		    <FormGroup>
       			<FormControlLabel checked={this.state.settings_damage_logout} onChange={(event)=>{this.handleSettingsDamageLogoutChange(event)}} control={<Switch/>} label="Logout on low health" />
+      			<FormControlLabel checked={this.state.settings_auto_eat} onChange={(event)=>{this.handleSettingsAutoEatChange(event)}} control={<Switch/>} label="Auto eat" />
     		</FormGroup>	
 
       <Table size="small">
@@ -284,7 +296,7 @@ export default class App extends React.Component {
 		  </FormControl>
         </Grid>
         <Grid item xs="9">
-	  	  <Autocomplete id="chatmsg" sx={{width: '100%'}} options={this.state.tabs} freeSolo onKeyPress={(e) => { if (e.key === 'Enter') { onChatButton(this) }}} onKeyDown={(e) => { if (e.key === 'Tab') { e.preventDefault();onChatTab(this); }}} value={this.state.chatmsg} onChange={(event) => {this.handleChatmsgChange(event,this)}}  onInputChange={(event) => {this.handleChatmsgChange(event,this)}} renderInput={(params) => <TextField  {...params} fullWidth InputLabelProps={{ shrink: true }} label="Chatmsg" variant="outlined" size="small"/>}
+	  	  <Autocomplete clearIcon={<></>} id="chatmsg" sx={{width: '100%'}} options={this.state.tabs} freeSolo onKeyPress={(e) => { if (e.key === 'Enter') { onChatButton(this) }}} onKeyDown={(e) => { if (e.key === 'Tab') { e.preventDefault();onChatTab(this); }}} value={this.state.chatmsg} onChange={(event) => {this.handleChatmsgChange(event,this)}}  onInputChange={(event) => {this.handleChatmsgChange(event,this)}} renderInput={(params) => <TextField  {...params} fullWidth InputLabelProps={{ shrink: true }} label="Chatmsg" variant="outlined" size="small"/>}
 		  />
         </Grid>
         <Grid item xs="auto">
