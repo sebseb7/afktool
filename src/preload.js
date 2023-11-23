@@ -15,10 +15,16 @@ contextBridge.exposeInMainWorld("ipcApi", {
 	stop: () => {
 		ipcRenderer.invoke("stop");
 	},
+	drop: () => {
+		ipcRenderer.invoke("drop");
+	},
 	chat: (username, message) => {
 		ipcRenderer.invoke("chat", [username, message]);
 	},
 	tab: (message) => ipcRenderer.invoke("tab", message),
+	ctrl: (ctrl) => ipcRenderer.invoke("ctrl", ctrl),
+	ctrlup: (ctrl) => ipcRenderer.invoke("ctrlup", ctrl),
+	ctrldown: (ctrl) => ipcRenderer.invoke("ctrldown", ctrl),
 	state: (name, value) => {
 		ipcRenderer.invoke("state", [name, value]);
 	},

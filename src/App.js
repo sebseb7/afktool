@@ -26,6 +26,12 @@ import TableRow from "@mui/material/TableRow";
 
 import IconButton from "@mui/material/IconButton";
 import WestIcon from "@mui/icons-material/West";
+import EastIcon from "@mui/icons-material/East";
+import NorthIcon from "@mui/icons-material/North";
+import SouthIcon from "@mui/icons-material/South";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import BackHandIcon from "@mui/icons-material/BackHand";
 
 const darkTheme = createTheme({
 	palette: {
@@ -43,6 +49,18 @@ function onGoButton(ctx) {
 }
 function onStopButton(ctx) {
 	window.ipcApi.stop();
+}
+function onDropButton(ctx) {
+	window.ipcApi.drop();
+}
+function onCtrlButton(ctrl) {
+	window.ipcApi.ctrl(ctrl);
+}
+function onCtrlUpButton(ctrl) {
+	window.ipcApi.ctrlup(ctrl);
+}
+function onCtrlDownButton(ctrl) {
+	window.ipcApi.ctrldown(ctrl);
 }
 function onChatButton(ctx) {
 	window.ipcApi.chat(ctx.state.toPlayer, ctx.state.chatmsg);
@@ -143,15 +161,15 @@ export default class App extends React.Component {
 		window.ipcApi.handlePosition((event, value, yaw, pitch) => {
 			this.setState({
 				position:
-					Math.round(value.x * 100) / 100 +
+					Math.round(value.x * 10) / 10 +
 					" " +
-					Math.round(value.y * 100) / 100 +
+					Math.round(value.y * 10) / 10 +
 					" " +
-					Math.round(value.z * 100) / 100 +
+					Math.round(value.z * 10) / 10 +
 					" (" +
-					Math.round(((yaw * -1 - Math.PI) / Math.PI) * 18000) / 100 +
+					Math.round(((yaw * -1 - Math.PI) / Math.PI) * 1800) / 10 +
 					"/" +
-					Math.round(((pitch * -1) / Math.PI) * 18000) / 100 +
+					Math.round(((pitch * -1) / Math.PI) * 1800) / 10 +
 					")",
 			});
 		});
@@ -329,6 +347,14 @@ export default class App extends React.Component {
 											</>
 										}
 									/>
+									<FormControlLabel
+										checked={this.state.settings_hold_use}
+										onChange={(event) => {
+											this.handleSettingsHoldUseChange(event);
+										}}
+										control={<Switch />}
+										label="Hold place"
+									/>
 								</FormGroup>
 								<Table size="small">
 									<TableBody>
@@ -403,6 +429,71 @@ export default class App extends React.Component {
 										</Button>
 									</Grid>
 								</Grid>
+								<Stack direction="row" spacing={1}>
+									<IconButton
+										onClick={() => {
+											onCtrlButton("sprint");
+										}}
+									>
+										<DirectionsRunIcon />
+									</IconButton>
+									<IconButton
+										onMouseDown={() => {
+											onCtrlDownButton("forward");
+										}}
+										onMouseUp={() => {
+											onCtrlUpButton("forward");
+										}}
+									>
+										<NorthIcon />
+									</IconButton>
+									<IconButton
+										onClick={() => {
+											onCtrlButton("sneak");
+										}}
+									>
+										<DirectionsWalkIcon />
+									</IconButton>
+									<IconButton
+										onClick={() => {
+											onDropButton(this.state);
+										}}
+									>
+										<BackHandIcon />
+									</IconButton>
+								</Stack>
+								<Stack direction="row" spacing={1}>
+									<IconButton
+										onMouseDown={() => {
+											onCtrlDownButton("left");
+										}}
+										onMouseUp={() => {
+											onCtrlUpButton("left");
+										}}
+									>
+										<WestIcon />
+									</IconButton>
+									<IconButton
+										onMouseDown={() => {
+											onCtrlDownButton("back");
+										}}
+										onMouseUp={() => {
+											onCtrlUpButton("back");
+										}}
+									>
+										<SouthIcon />
+									</IconButton>
+									<IconButton
+										onMouseDown={() => {
+											onCtrlDownButton("right");
+										}}
+										onMouseUp={() => {
+											onCtrlUpButton("right");
+										}}
+									>
+										<EastIcon />
+									</IconButton>
+								</Stack>
 							</Stack>
 						</Grid>
 					</Grid>

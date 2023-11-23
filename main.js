@@ -18,7 +18,7 @@ const {
 var counter = 1;
 var bot;
 
-var settings = { damage_logout: false, hold_use: false, auto_eat: false, attack: false, ticks: 30 };
+var settings = { damage_logout: false, hold_use: false, hold_use_inhibit: false, auto_eat: false, attack: false, ticks: 30 };
 
 var tick = 0;
 
@@ -30,7 +30,7 @@ function createWindow() {
 
 	const win = new BrowserWindow({
 		autoHideMenuBar: true,
-		width: 1000,
+		width: 1200,
 		height: 800,
 		minWidth: 500,
 		minHeight: 500,
@@ -98,12 +98,15 @@ function createWindow() {
 				bot.autoEat.disable();
 			}
 			if (settings.auto_eat && bot.health < 16 && bot.food < 20) {
-				await bot.autoEat.eat();
+				bot.autoEat
+					.eat(true)
+					.then(() => {})
+					.catch((e) => {});
 			}
 			if (timer1) clearInterval(timer1);
 			timer1 = setInterval(() => {}, 50);
 		});
-		bot.on("autoeat_error", console.log);
+		bot.on("autoeat_error", () => {});
 		bot.on("kicked", (msg) => {
 			if (timer1) clearInterval(timer1);
 			win.webContents.send("log", "kicked: " + msg);
@@ -144,7 +147,10 @@ function createWindow() {
 				bot.quit();
 			}
 			if (settings.auto_eat && bot.health < 16 && bot.food < 20) {
-				bot.autoEat.eat();
+				bot.autoEat
+					.eat(true)
+					.then(() => {})
+					.catch((e) => {});
 			}
 		});
 		bot.on("playerJoined", () => {
@@ -170,7 +176,7 @@ function createWindow() {
 			//win.webContents.send('log', '[path '+goal+']');
 		});
 
-		bot.on("physicsTick", () => {
+		bot.on("physicsTick", async () => {
 			tick++;
 			if (settings.ticks > 0) {
 				if (tick % settings.ticks == 0) {
@@ -182,6 +188,30 @@ function createWindow() {
 							bot.swingArm();
 						}
 					}
+				}
+			}
+			if ((settings.hold_use_inhibit == false) & settings.hold_use) {
+				settings.hold_use_inhibit = true;
+				const block = bot.blockAtCursor(5);
+
+				if (block) {
+					let x = 0;
+					let y = 0;
+					let z = 0;
+					if (block.face == 0) y = -1;
+					if (block.face == 1) y = 1;
+					if (block.face == 2) z = -1;
+					if (block.face == 3) z = 1;
+					if (block.face == 4) x = -1;
+					if (block.face == 5) x = 1;
+
+					try {
+						const dest = block.position.plus(new Vec3(x, y, z));
+						await bot._genericPlace(block, new Vec3(x, y, z), { swingArm: "right" });
+					} catch (error) {
+						console.log("That did not go well.", error);
+					}
+					settings.hold_use_inhibit = false;
 				}
 			}
 		});
@@ -201,8 +231,21 @@ function createWindow() {
 			bot.pathfinder.setGoal(new GoalXZ(msg[0], msg[2]));
 		}
 	});
+	ipcMain.handle("drop", (event, msg) => {
+		//bot.setQuickBarSlot(0..8)
+		bot.unequip("hand");
+	});
 	ipcMain.handle("stop", (event, msg) => {
 		bot.pathfinder.setGoal(null);
+	});
+	ipcMain.handle("ctrl", (event, msg) => {
+		bot.setControlState(msg, !bot.getControlState(msg));
+	});
+	ipcMain.handle("ctrlup", (event, msg) => {
+		bot.setControlState(msg, false);
+	});
+	ipcMain.handle("ctrldown", (event, msg) => {
+		bot.setControlState(msg, true);
 	});
 	ipcMain.handle("logout", () => {
 		if (timer1) clearInterval(timer1);
@@ -239,7 +282,10 @@ function createWindow() {
 					bot.autoEat.enable();
 					bot.autoEat.options.startAt = 18;
 					if (bot.health < 16 && bot.food < 20) {
-						bot.autoEat.eat();
+						bot.autoEat
+							.eat(true)
+							.then(() => {})
+							.catch((e) => {});
 					}
 				} else {
 					bot.autoEat.disable();
