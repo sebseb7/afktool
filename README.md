@@ -1,4 +1,4 @@
-# afktool
+# afktool - a lightweight Minecraft client AFK bot 
 
 [Download](https://github.com/sebseb7/afktool/releases/download/v0.4.0/afktool.Setup.0.4.0.exe)
 
