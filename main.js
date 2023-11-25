@@ -14,11 +14,12 @@ const {
 	Movements,
 	goals: { GoalBlock, GoalXZ },
 } = require("mineflayer-pathfinder");
+const antiafk = require("mineflayer-antiafk");
 
 var counter = 1;
 var bot;
 
-var settings = { damage_logout: false, hold_use: false, hold_use_inhibit: false, auto_eat: false, attack: false, ticks: 30 };
+var settings = { anti_afk: false, damage_logout: false, hold_use: false, hold_use_inhibit: false, auto_eat: false, attack: false, ticks: 30 };
 
 var tick = 0;
 
@@ -31,7 +32,7 @@ function createWindow() {
 	const win = new BrowserWindow({
 		autoHideMenuBar: true,
 		width: 1200,
-		height: 800,
+		height: 880,
 		minWidth: 500,
 		minHeight: 500,
 		backgroundColor: "#121212",
@@ -83,21 +84,31 @@ function createWindow() {
 				win.webContents.send("link", msg.verification_uri);
 			},
 		});
+
 		bot.loadPlugin(loader);
 		bot.loadPlugin(autoeat);
 		bot.loadPlugin(pathfinder);
+		bot.loadPlugin(antiafk);
+
 		bot.on("spawn", async () => {
 			win.webContents.send("log", "logged in");
 			win.webContents.send("players", Object.keys(bot.players));
 			win.webContents.send("health", bot.health, bot.food);
 			win.webContents.send("position", bot.entity.position, bot.entity.yaw, bot.entity.pitch);
+			bot.afk.setOptions({ actions: ["rotate", "swingArm", "jump"], autoEatEnabled: false, killauraEnabled: false, chatting: false, fishing: false });
+			if (settings.anti_afk) {
+				bot.afk.start();
+			} else {
+				bot.afk.stop();
+			}
 			if (settings.auto_eat) {
 				bot.autoEat.enable();
 				bot.autoEat.options.startAt = 18;
+				bot.autoEat.options.offhand = false;
 			} else {
 				bot.autoEat.disable();
 			}
-			if (settings.auto_eat && bot.health < 16 && bot.food < 20) {
+			if (settings.auto_eat && ((bot.health < 16 && bot.food < 20) || bot.food < 18)) {
 				bot.autoEat
 					.eat(true)
 					.then(() => {})
@@ -105,24 +116,24 @@ function createWindow() {
 			}
 			if (timer1) clearInterval(timer1);
 			timer1 = setInterval(() => {}, 50);
-			bot.inventory.on("updateSlot", (slot,old,item) => {
-				win.webContents.send("slot", slot, item && item.name, item && item.stackSize);
+			bot.inventory.on("updateSlot", (slot, old, item) => {
+				win.webContents.send("slot", slot, item && item.name, item && item.count);
 			});
-			win.webContents.send("slot", 5, bot.inventory.slots[5] && bot.inventory.slots[5].name, bot.inventory.slots[5] && bot.inventory.slots[5].stackSize);
-			win.webContents.send("slot", 6, bot.inventory.slots[6] && bot.inventory.slots[6].name, bot.inventory.slots[6] && bot.inventory.slots[6].stackSize);
-			win.webContents.send("slot", 7, bot.inventory.slots[7] && bot.inventory.slots[7].name, bot.inventory.slots[7] && bot.inventory.slots[7].stackSize);
-			win.webContents.send("slot", 8, bot.inventory.slots[8] && bot.inventory.slots[8].name, bot.inventory.slots[8] && bot.inventory.slots[8].stackSize);
-			win.webContents.send("slot", 36, bot.inventory.slots[36] && bot.inventory.slots[36].name, bot.inventory.slots[36] && bot.inventory.slots[36].stackSize);
-			win.webContents.send("slot", 37, bot.inventory.slots[37] && bot.inventory.slots[37].name, bot.inventory.slots[37] && bot.inventory.slots[37].stackSize);
-			win.webContents.send("slot", 38, bot.inventory.slots[38] && bot.inventory.slots[38].name, bot.inventory.slots[38] && bot.inventory.slots[38].stackSize);
-			win.webContents.send("slot", 39, bot.inventory.slots[39] && bot.inventory.slots[39].name, bot.inventory.slots[39] && bot.inventory.slots[39].stackSize);
-			win.webContents.send("slot", 40, bot.inventory.slots[40] && bot.inventory.slots[40].name, bot.inventory.slots[40] && bot.inventory.slots[40].stackSize);
-			win.webContents.send("slot", 41, bot.inventory.slots[41] && bot.inventory.slots[41].name, bot.inventory.slots[41] && bot.inventory.slots[41].stackSize);
-			win.webContents.send("slot", 42, bot.inventory.slots[42] && bot.inventory.slots[42].name, bot.inventory.slots[42] && bot.inventory.slots[42].stackSize);
-			win.webContents.send("slot", 43, bot.inventory.slots[43] && bot.inventory.slots[43].name, bot.inventory.slots[43] && bot.inventory.slots[43].stackSize);
-			win.webContents.send("slot", 44, bot.inventory.slots[44] && bot.inventory.slots[44].name, bot.inventory.slots[44] && bot.inventory.slots[44].stackSize);
-			win.webContents.send("slot", 45, bot.inventory.slots[45] && bot.inventory.slots[45].name, bot.inventory.slots[45] && bot.inventory.slots[45].stackSize);
-			win.webContents.send("slotActive",bot.quickBarSlot);
+			win.webContents.send("slot", 5, bot.inventory.slots[5] && bot.inventory.slots[5].name, 1);
+			win.webContents.send("slot", 6, bot.inventory.slots[6] && bot.inventory.slots[6].name, 1);
+			win.webContents.send("slot", 7, bot.inventory.slots[7] && bot.inventory.slots[7].name, 1);
+			win.webContents.send("slot", 8, bot.inventory.slots[8] && bot.inventory.slots[8].name, 1);
+			win.webContents.send("slot", 36, bot.inventory.slots[36] && bot.inventory.slots[36].name, bot.inventory.slots[36] && bot.inventory.slots[36].count);
+			win.webContents.send("slot", 37, bot.inventory.slots[37] && bot.inventory.slots[37].name, bot.inventory.slots[37] && bot.inventory.slots[37].count);
+			win.webContents.send("slot", 38, bot.inventory.slots[38] && bot.inventory.slots[38].name, bot.inventory.slots[38] && bot.inventory.slots[38].count);
+			win.webContents.send("slot", 39, bot.inventory.slots[39] && bot.inventory.slots[39].name, bot.inventory.slots[39] && bot.inventory.slots[39].count);
+			win.webContents.send("slot", 40, bot.inventory.slots[40] && bot.inventory.slots[40].name, bot.inventory.slots[40] && bot.inventory.slots[40].count);
+			win.webContents.send("slot", 41, bot.inventory.slots[41] && bot.inventory.slots[41].name, bot.inventory.slots[41] && bot.inventory.slots[41].count);
+			win.webContents.send("slot", 42, bot.inventory.slots[42] && bot.inventory.slots[42].name, bot.inventory.slots[42] && bot.inventory.slots[42].count);
+			win.webContents.send("slot", 43, bot.inventory.slots[43] && bot.inventory.slots[43].name, bot.inventory.slots[43] && bot.inventory.slots[43].count);
+			win.webContents.send("slot", 44, bot.inventory.slots[44] && bot.inventory.slots[44].name, bot.inventory.slots[44] && bot.inventory.slots[44].count);
+			win.webContents.send("slot", 45, bot.inventory.slots[45] && bot.inventory.slots[45].name, bot.inventory.slots[45] && bot.inventory.slots[45].count);
+			win.webContents.send("slotActive", bot.quickBarSlot);
 		});
 		bot.on("autoeat_error", () => {});
 		bot.on("kicked", (msg) => {
@@ -164,7 +175,7 @@ function createWindow() {
 				win.webContents.send("log", "health logout");
 				bot.quit();
 			}
-			if (settings.auto_eat && bot.health < 16 && bot.food < 20) {
+			if (settings.auto_eat && ((bot.health < 16 && bot.food < 20) || bot.food < 18)) {
 				bot.autoEat
 					.eat(true)
 					.then(() => {})
@@ -254,7 +265,7 @@ function createWindow() {
 	});
 	ipcMain.handle("drop", async (event, msg) => {
 		await bot.unequip("hand");
-		win.webContents.send("slotActive",bot.quickBarSlot);
+		win.webContents.send("slotActive", bot.quickBarSlot);
 	});
 	ipcMain.handle("stop", (event, msg) => {
 		bot.pathfinder.setGoal(null);
@@ -292,21 +303,27 @@ function createWindow() {
 	});
 	ipcMain.handle("state", (event, msg) => {
 		if (bot)
-			if (msg[0] == "hold_use") {
+			if (msg[0] == "anti_afk") {
 				if (msg[1]) {
+					bot.afk.stopping = false;
+					bot.afk.start();
 				} else {
+					bot.afk.stop();
 				}
 			}
 		if (bot)
 			if (msg[0] == "auto_eat") {
 				if (msg[1]) {
 					bot.autoEat.enable();
+					bot.autoEat.options.offhand = false;
 					bot.autoEat.options.startAt = 18;
-					if (bot.health < 16 && bot.food < 20) {
+					if ((bot.health < 16 && bot.food < 20) || bot.food < 18) {
 						bot.autoEat
 							.eat(true)
 							.then(() => {})
-							.catch((e) => {});
+							.catch((e) => {
+								console.log(e);
+							});
 					}
 				} else {
 					bot.autoEat.disable();

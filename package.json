@@ -17,6 +17,7 @@
     "electron-store": "^8.1.0",
     "html-react-parser": "^5.0.6",
     "mineflayer": "^4.14.0",
+    "mineflayer-antiafk": "github:Etiaro/mineflayer-antiafk",
     "mineflayer-auto-eat": "^3.3.6",
     "mineflayer-pathfinder": "^2.4.5",
     "react": "^18.2.0",

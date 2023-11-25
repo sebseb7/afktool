@@ -32,9 +32,9 @@ import SouthIcon from "@mui/icons-material/South";
 import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import BackHandIcon from "@mui/icons-material/BackHand";
-import AirlineStopsIcon from '@mui/icons-material/AirlineStops';
+import AirlineStopsIcon from "@mui/icons-material/AirlineStops";
 
-const invsprite = require('./invsprite.json');
+const invsprite = require("./invsprite.json");
 
 const darkTheme = createTheme({
 	palette: {
@@ -44,9 +44,9 @@ const darkTheme = createTheme({
 
 const reactParse = require("html-react-parser").default;
 
-function onSlotButton(ctx,slot) {
+function onSlotButton(ctx, slot) {
 	window.ipcApi.setSlot(slot);
-	ctx.setState({ slotActive:slot });
+	ctx.setState({ slotActive: slot });
 }
 function onLookButton(ctx) {
 	window.ipcApi.look(Math.PI - (document.getElementById("yaw").value / 90) * (Math.PI / 2), (document.getElementById("pitch").value / 90) * (Math.PI / 2) * -1);
@@ -144,27 +144,34 @@ export default class App extends React.Component {
 			settings_damage_logout: false,
 			settings_hold_use: false,
 			settings_auto_eat: false,
+			settings_anti_afk: false,
 			settings_attack: false,
 			settings_ticks: 30,
-			slot_36:'air',
-			slot_37:'air',
-			slot_38:'air',
-			slot_39:'air',
-			slot_40:'air',
-			slot_41:'air',
-			slot_42:'air',
-			slot_43:'air',
-			slot_44:'air',
-			slot_36num:'',
-			slot_37num:'',
-			slot_38num:'',
-			slot_39num:'',
-			slot_40num:'',
-			slot_41num:'',
-			slot_42num:'',
-			slot_43num:'',
-			slot_44num:'',
-			slotActive:null
+			slot_5: "air",
+			slot_6: "air",
+			slot_7: "air",
+			slot_8: "air",
+			slot_36: "air",
+			slot_37: "air",
+			slot_38: "air",
+			slot_39: "air",
+			slot_40: "air",
+			slot_41: "air",
+			slot_42: "air",
+			slot_43: "air",
+			slot_44: "air",
+			slot_45: "air",
+			slot_36num: "",
+			slot_37num: "",
+			slot_38num: "",
+			slot_39num: "",
+			slot_40num: "",
+			slot_41num: "",
+			slot_42num: "",
+			slot_43num: "",
+			slot_44num: "",
+			slot_45num: "",
+			slotActive: null,
 		};
 	}
 
@@ -187,19 +194,24 @@ export default class App extends React.Component {
 		window.ipcApi.handleSlotActive((event, value) => {
 			this.setState({ slotActive: value });
 		});
-		window.ipcApi.handleSlot((event, slot,name,size) => {
-			console.log(slot,name,size);
-			if(!name) name = 'air';
-			if(!invsprite[name]) name = 'barrier';
-			if(slot === 36) this.setState({ slot_36: name,slot_36num:(size && size > 1)?size:'' });
-			if(slot === 37) this.setState({ slot_37: name,slot_37num:(size && size > 1)?size:'' });
-			if(slot === 38) this.setState({ slot_38: name,slot_38num:(size && size > 1)?size:'' });
-			if(slot === 39) this.setState({ slot_39: name,slot_39num:(size && size > 1)?size:'' });
-			if(slot === 40) this.setState({ slot_40: name,slot_40num:(size && size > 1)?size:'' });
-			if(slot === 41) this.setState({ slot_41: name,slot_41num:(size && size > 1)?size:'' });
-			if(slot === 42) this.setState({ slot_42: name,slot_42num:(size && size > 1)?size:'' });
-			if(slot === 43) this.setState({ slot_43: name,slot_43num:(size && size > 1)?size:'' });
-			if(slot === 44) this.setState({ slot_44: name,slot_44num:(size && size > 1)?size:'' });
+		window.ipcApi.handleSlot((event, slot, name, size) => {
+			if (!name) name = "air";
+			if (!invsprite[name]) name = "barrier";
+			if (slot === 5) this.setState({ slot_5: name });
+			if (slot === 6) this.setState({ slot_6: name });
+			if (slot === 7) this.setState({ slot_7: name });
+			if (slot === 8) this.setState({ slot_8: name });
+			if (slot === 45) this.setState({ slot_45: name, slot_45num: size && size > 1 ? size : "" });
+			if (slot === 36) this.setState({ slot_36: name, slot_36num: size && size > 1 ? size : "" });
+			if (slot === 36) this.setState({ slot_36: name, slot_36num: size && size > 1 ? size : "" });
+			if (slot === 37) this.setState({ slot_37: name, slot_37num: size && size > 1 ? size : "" });
+			if (slot === 38) this.setState({ slot_38: name, slot_38num: size && size > 1 ? size : "" });
+			if (slot === 39) this.setState({ slot_39: name, slot_39num: size && size > 1 ? size : "" });
+			if (slot === 40) this.setState({ slot_40: name, slot_40num: size && size > 1 ? size : "" });
+			if (slot === 41) this.setState({ slot_41: name, slot_41num: size && size > 1 ? size : "" });
+			if (slot === 42) this.setState({ slot_42: name, slot_42num: size && size > 1 ? size : "" });
+			if (slot === 43) this.setState({ slot_43: name, slot_43num: size && size > 1 ? size : "" });
+			if (slot === 44) this.setState({ slot_44: name, slot_44num: size && size > 1 ? size : "" });
 		});
 		window.ipcApi.handlePosition((event, value, yaw, pitch) => {
 			this.setState({
@@ -260,6 +272,10 @@ export default class App extends React.Component {
 	handleSettingsAutoEatChange(event) {
 		this.setState({ settings_auto_eat: event.target.checked });
 		window.ipcApi.state("auto_eat", event.target.checked);
+	}
+	handleSettingsAntiAfkChange(event) {
+		this.setState({ settings_anti_afk: event.target.checked });
+		window.ipcApi.state("anti_afk", event.target.checked);
 	}
 	handleSettingsAttackChange(event) {
 		this.setState({ settings_attack: event.target.checked });
@@ -358,6 +374,14 @@ export default class App extends React.Component {
 										}}
 										control={<Switch />}
 										label="Logout on low health"
+									/>
+									<FormControlLabel
+										checked={this.state.settings_anti_afk}
+										onChange={(event) => {
+											this.handleSettingsAntiAfkChange(event);
+										}}
+										control={<Switch />}
+										label="Anti AFK"
 									/>
 									<FormControlLabel
 										checked={this.state.settings_auto_eat}
@@ -545,15 +569,223 @@ export default class App extends React.Component {
 									</IconButton>
 								</Stack>
 								<Stack direction="row" spacing={0.3}>
-									<div onClick={()=>{onSlotButton(this,0)}} style={{border:'1px solid #'+((this.state.slotActive===0)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_36].x,backgroundPositionY:-1*invsprite[this.state.slot_36].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_36num}</div>
-									<div onClick={()=>{onSlotButton(this,1)}} style={{border:'1px solid #'+((this.state.slotActive===1)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_37].x,backgroundPositionY:-1*invsprite[this.state.slot_37].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_37num}</div>
-									<div onClick={()=>{onSlotButton(this,2)}} style={{border:'1px solid #'+((this.state.slotActive===2)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_38].x,backgroundPositionY:-1*invsprite[this.state.slot_38].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_38num}</div>
-									<div onClick={()=>{onSlotButton(this,3)}} style={{border:'1px solid #'+((this.state.slotActive===3)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_39].x,backgroundPositionY:-1*invsprite[this.state.slot_39].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_39num}</div>
-									<div onClick={()=>{onSlotButton(this,4)}} style={{border:'1px solid #'+((this.state.slotActive===4)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_40].x,backgroundPositionY:-1*invsprite[this.state.slot_40].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_40num}</div>
-									<div onClick={()=>{onSlotButton(this,5)}} style={{border:'1px solid #'+((this.state.slotActive===5)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_41].x,backgroundPositionY:-1*invsprite[this.state.slot_41].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_41num}</div>
-									<div onClick={()=>{onSlotButton(this,6)}} style={{border:'1px solid #'+((this.state.slotActive===6)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_42].x,backgroundPositionY:-1*invsprite[this.state.slot_42].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_42num}</div>
-									<div onClick={()=>{onSlotButton(this,7)}} style={{border:'1px solid #'+((this.state.slotActive===7)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_43].x,backgroundPositionY:-1*invsprite[this.state.slot_43].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_43num}</div>
-									<div onClick={()=>{onSlotButton(this,8)}} style={{border:'1px solid #'+((this.state.slotActive===8)?'aaa':'444'),width:32,height:32,backgroundPositionX:-1*invsprite[this.state.slot_44].x,backgroundPositionY:-1*invsprite[this.state.slot_44].y,backgroundSize:'1024px auto',backgroundImage:'url(\'invsprite.png\')',userSelect:'none'}}>{this.state.slot_44num}</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 0);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 0 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_36].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_36].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_36num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 1);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 1 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_37].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_37].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_37num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 2);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 2 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_38].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_38].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_38num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 3);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 3 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_39].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_39].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_39num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 4);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 4 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_40].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_40].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_40num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 5);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 5 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_41].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_41].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_41num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 6);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 6 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_42].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_42].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_42num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 7);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 7 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_43].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_43].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_43num}
+									</div>
+									<div
+										onClick={() => {
+											onSlotButton(this, 8);
+										}}
+										style={{
+											border: "1px solid #" + (this.state.slotActive === 8 ? "aaa" : "444"),
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_44].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_44].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_44num}
+									</div>
+								</Stack>
+								<Stack direction="row" spacing={0.3}>
+									<div
+										style={{
+											border: "1px solid #444",
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_45].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_45].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									>
+										{this.state.slot_45num}
+									</div>
+									<div
+										style={{
+											border: "1px solid #444",
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_5].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_5].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									></div>
+									<div
+										style={{
+											border: "1px solid #444",
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_6].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_6].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									></div>
+									<div
+										style={{
+											border: "1px solid #444",
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_7].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_7].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									></div>
+									<div
+										style={{
+											border: "1px solid #444",
+											width: 32,
+											height: 32,
+											backgroundPositionX: -1 * invsprite[this.state.slot_8].x,
+											backgroundPositionY: -1 * invsprite[this.state.slot_8].y,
+											backgroundSize: "1024px auto",
+											backgroundImage: "url('invsprite.png')",
+											userSelect: "none",
+										}}
+									></div>
 								</Stack>
 							</Stack>
 						</Grid>
