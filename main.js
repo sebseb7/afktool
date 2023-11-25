@@ -319,7 +319,7 @@ function createWindow() {
 					bot.autoEat.enable();
 					if ((bot.health < 16 && bot.food < 20) || bot.food < 18) {
 						bot.autoEat
-							.eat(true)
+							.eat(false)
 							.then(() => {})
 							.catch((e) => {
 								console.log(e);
