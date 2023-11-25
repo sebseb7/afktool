@@ -105,6 +105,24 @@ function createWindow() {
 			}
 			if (timer1) clearInterval(timer1);
 			timer1 = setInterval(() => {}, 50);
+			bot.inventory.on("updateSlot", (slot,old,item) => {
+				win.webContents.send("slot", slot, item && item.name, item && item.stackSize);
+			});
+			win.webContents.send("slot", 5, bot.inventory.slots[5] && bot.inventory.slots[5].name, bot.inventory.slots[5] && bot.inventory.slots[5].stackSize);
+			win.webContents.send("slot", 6, bot.inventory.slots[6] && bot.inventory.slots[6].name, bot.inventory.slots[6] && bot.inventory.slots[6].stackSize);
+			win.webContents.send("slot", 7, bot.inventory.slots[7] && bot.inventory.slots[7].name, bot.inventory.slots[7] && bot.inventory.slots[7].stackSize);
+			win.webContents.send("slot", 8, bot.inventory.slots[8] && bot.inventory.slots[8].name, bot.inventory.slots[8] && bot.inventory.slots[8].stackSize);
+			win.webContents.send("slot", 36, bot.inventory.slots[36] && bot.inventory.slots[36].name, bot.inventory.slots[36] && bot.inventory.slots[36].stackSize);
+			win.webContents.send("slot", 37, bot.inventory.slots[37] && bot.inventory.slots[37].name, bot.inventory.slots[37] && bot.inventory.slots[37].stackSize);
+			win.webContents.send("slot", 38, bot.inventory.slots[38] && bot.inventory.slots[38].name, bot.inventory.slots[38] && bot.inventory.slots[38].stackSize);
+			win.webContents.send("slot", 39, bot.inventory.slots[39] && bot.inventory.slots[39].name, bot.inventory.slots[39] && bot.inventory.slots[39].stackSize);
+			win.webContents.send("slot", 40, bot.inventory.slots[40] && bot.inventory.slots[40].name, bot.inventory.slots[40] && bot.inventory.slots[40].stackSize);
+			win.webContents.send("slot", 41, bot.inventory.slots[41] && bot.inventory.slots[41].name, bot.inventory.slots[41] && bot.inventory.slots[41].stackSize);
+			win.webContents.send("slot", 42, bot.inventory.slots[42] && bot.inventory.slots[42].name, bot.inventory.slots[42] && bot.inventory.slots[42].stackSize);
+			win.webContents.send("slot", 43, bot.inventory.slots[43] && bot.inventory.slots[43].name, bot.inventory.slots[43] && bot.inventory.slots[43].stackSize);
+			win.webContents.send("slot", 44, bot.inventory.slots[44] && bot.inventory.slots[44].name, bot.inventory.slots[44] && bot.inventory.slots[44].stackSize);
+			win.webContents.send("slot", 45, bot.inventory.slots[45] && bot.inventory.slots[45].name, bot.inventory.slots[45] && bot.inventory.slots[45].stackSize);
+			win.webContents.send("slotActive",bot.quickBarSlot);
 		});
 		bot.on("autoeat_error", () => {});
 		bot.on("kicked", (msg) => {
@@ -219,6 +237,9 @@ function createWindow() {
 	ipcMain.handle("look", (event, msg) => {
 		bot.smoothLook.look(msg[0], msg[1]);
 	});
+	ipcMain.handle("setSlot", (event, msg) => {
+		bot.setQuickBarSlot(msg);
+	});
 	ipcMain.handle("go", (event, msg) => {
 		bot.pathfinder.setGoal(null);
 		const defaultMove = new Movements(bot);
@@ -231,9 +252,9 @@ function createWindow() {
 			bot.pathfinder.setGoal(new GoalXZ(msg[0], msg[2]));
 		}
 	});
-	ipcMain.handle("drop", (event, msg) => {
-		//bot.setQuickBarSlot(0..8)
-		bot.unequip("hand");
+	ipcMain.handle("drop", async (event, msg) => {
+		await bot.unequip("hand");
+		win.webContents.send("slotActive",bot.quickBarSlot);
 	});
 	ipcMain.handle("stop", (event, msg) => {
 		bot.pathfinder.setGoal(null);

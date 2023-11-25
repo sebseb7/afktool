@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("ipcApi", {
 	chat: (username, message) => {
 		ipcRenderer.invoke("chat", [username, message]);
 	},
+	setSlot: (message) => ipcRenderer.invoke("setSlot", message),
 	tab: (message) => ipcRenderer.invoke("tab", message),
 	ctrl: (ctrl) => ipcRenderer.invoke("ctrl", ctrl),
 	ctrlup: (ctrl) => ipcRenderer.invoke("ctrlup", ctrl),
@@ -38,6 +39,14 @@ contextBridge.exposeInMainWorld("ipcApi", {
 	handlePlayers: (callback) => {
 		ipcRenderer.removeAllListeners("players");
 		return ipcRenderer.on("players", callback);
+	},
+	handleSlot: (callback) => {
+		ipcRenderer.removeAllListeners("slot");
+		return ipcRenderer.on("slot", callback);
+	},
+	handleSlotActive: (callback) => {
+		ipcRenderer.removeAllListeners("slotActive");
+		return ipcRenderer.on("slotActive", callback);
 	},
 	handleLog: (callback) => {
 		ipcRenderer.removeAllListeners("log");
