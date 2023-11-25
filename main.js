@@ -102,15 +102,15 @@ function createWindow() {
 				bot.afk.stop();
 			}
 			if (settings.auto_eat) {
-				bot.autoEat.enable();
 				bot.autoEat.options.startAt = 18;
 				bot.autoEat.options.offhand = false;
+				bot.autoEat.enable();
 			} else {
 				bot.autoEat.disable();
 			}
 			if (settings.auto_eat && ((bot.health < 16 && bot.food < 20) || bot.food < 18)) {
 				bot.autoEat
-					.eat(true)
+					.eat(false)
 					.then(() => {})
 					.catch((e) => {});
 			}
@@ -177,7 +177,7 @@ function createWindow() {
 			}
 			if (settings.auto_eat && ((bot.health < 16 && bot.food < 20) || bot.food < 18)) {
 				bot.autoEat
-					.eat(true)
+					.eat(false)
 					.then(() => {})
 					.catch((e) => {});
 			}
@@ -314,9 +314,9 @@ function createWindow() {
 		if (bot)
 			if (msg[0] == "auto_eat") {
 				if (msg[1]) {
-					bot.autoEat.enable();
 					bot.autoEat.options.offhand = false;
 					bot.autoEat.options.startAt = 18;
+					bot.autoEat.enable();
 					if ((bot.health < 16 && bot.food < 20) || bot.food < 18) {
 						bot.autoEat
 							.eat(true)
