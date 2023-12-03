@@ -22,11 +22,11 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-      
-	  - name: Install dependencies
+
+      - name: Install dependencies
         run: yarn install --network-timeout 600000
-	  
-	  - name: Build/release Electron app
+  
+      - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
           # GitHub token, automatically provided to the action
