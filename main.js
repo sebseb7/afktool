@@ -246,10 +246,10 @@ function createWindow() {
 		});
 	});
 	ipcMain.handle("look", (event, msg) => {
-		bot.smoothLook.look(msg[0], msg[1]);
+		if (bot) bot.smoothLook.look(msg[0], msg[1]);
 	});
 	ipcMain.handle("setSlot", (event, msg) => {
-		bot.setQuickBarSlot(msg);
+		if (bot) bot.setQuickBarSlot(msg);
 	});
 	ipcMain.handle("go", (event, msg) => {
 		bot.pathfinder.setGoal(null);
