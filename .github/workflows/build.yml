@@ -20,7 +20,13 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Build/release Electron app
+      - name: Install dependencies
+        run: npm i .
+      
+	  - name: Install dependencies
+        run: yarn install --network-timeout 600000
+	  
+	  - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
           # GitHub token, automatically provided to the action
