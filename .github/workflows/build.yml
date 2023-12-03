@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
 
     steps:
       - name: Check out Git repository
@@ -25,5 +25,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - run: echo "filename=`ls dist/*.exe |xargs basename`" >> $GITHUB_ENV
+     
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.filename }}
+          path: dist
+
       - name: show
-        run: dir dist
+        run: ls dist
