@@ -23,6 +23,10 @@ var settings = { anti_afk: false, damage_logout: false, hold_use: false, hold_us
 
 var tick = 0;
 
+var uuid = {};
+
+let timer1;
+
 function createWindow() {
 	let host = store.get("host");
 	let port = store.get("port");
@@ -60,22 +64,27 @@ function createWindow() {
 	ipcMain.handle("versions", (event, msg) => {
 		return mc.supportedVersions;
 	});
-
-	let timer1;
+	ipcMain.handle("profiles", (event, msg) => {
+		return [store.get("namea"), store.get("nameb"), store.get("namec"), store.get("named")];
+	});
 
 	ipcMain.handle("login", (event, msg) => {
-		let uuid = store.get("uuid");
+		if (timer1) clearInterval(timer1);
+		if (bot) {
+			bot.quit();
+		}
+		uuid[msg[3]] = store.get("uuid" + msg[3]);
 
-		if (!uuid) {
-			uuid = uuidv4();
-			store.set("uuid", uuid);
+		if (!uuid[msg[3]]) {
+			uuid[msg[3]] = uuidv4();
+			store.set("uuid" + msg[3], uuid[msg[3]]);
 		}
 		store.set("host", msg[0]);
 		store.set("port", msg[1]);
 
 		bot = mineflayer.createBot({
 			host: msg[0], // minecraft server ip
-			username: uuid, // minecraft username
+			username: uuid[msg[3]], // minecraft username
 			port: msg[1], // only set if you need a port that isn't 25565
 			version: msg[2],
 			auth: "microsoft", // only set if you need microsoft auth, then set this to 'microsoft'
@@ -165,6 +174,10 @@ function createWindow() {
 		});
 		bot.on("move", () => {
 			win.webContents.send("position", bot.entity.position, bot.entity.yaw, bot.entity.pitch);
+		});
+		bot._client.on("session", (sess) => {
+			store.set("name" + msg[3], sess.selectedProfile.name);
+			win.webContents.send("name", msg[3], sess.selectedProfile.name);
 		});
 		bot.on("forcedMove", () => {
 			win.webContents.send("position", bot.entity.position, bot.entity.yaw, bot.entity.pitch);
@@ -283,9 +296,9 @@ function createWindow() {
 		if (timer1) clearInterval(timer1);
 		bot.quit();
 	});
-	ipcMain.handle("reauth", () => {
-		let uuid = uuidv4();
-		store.set("uuid", uuid);
+	ipcMain.handle("reauth", (event, profile) => {
+		uuid[profile] = uuidv4();
+		store.set("uuid" + profile, uuid[profile]);
 	});
 	ipcMain.handle("chat", (event, msg) => {
 		if (msg[0] == "_all") {
@@ -339,6 +352,7 @@ app.on("window-all-closed", () => {
 	if (process.platform !== "darwin") {
 		app.quit();
 	}
+	if (timer1) clearInterval(timer1);
 });
 
 app.on("activate", () => {

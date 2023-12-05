@@ -97,13 +97,13 @@ async function onChatTab(ctx) {
 	ctx.setState({ tabs: tabs.map((a) => prefix + a.match) });
 }
 function onLoginButton(state) {
-	window.ipcApi.login(document.getElementById("hostname").value, document.getElementById("port").value, state.version);
+	window.ipcApi.login(document.getElementById("hostname").value, document.getElementById("port").value, state.version, state.profile);
 }
 function onLogoutButton() {
 	window.ipcApi.logout();
 }
-function onReauthButton() {
-	window.ipcApi.reauth();
+function onReauthButton(state) {
+	window.ipcApi.reauth(state.profile);
 }
 
 function resizeWindow(setState) {
@@ -135,6 +135,13 @@ export default class App extends React.Component {
 			players: [],
 			toPlayer: "_all",
 			versions: [],
+			profiles: [
+				{ value: "a", text: "Profile A" },
+				{ value: "b", text: "Profile B" },
+				{ value: "c", text: "Profile C" },
+				{ value: "d", text: "Profile D" },
+			],
+			profile: "a",
 			version: "",
 			chatmsg: "",
 			health: "",
@@ -213,6 +220,14 @@ export default class App extends React.Component {
 			if (slot === 43) this.setState({ slot_43: name, slot_43num: size && size > 1 ? size : "" });
 			if (slot === 44) this.setState({ slot_44: name, slot_44num: size && size > 1 ? size : "" });
 		});
+		window.ipcApi.handleName((event, slot, name) => {
+			const profiles = this.state.profiles;
+			if (slot === "a") profiles[0].text = name;
+			if (slot === "b") profiles[1].text = name;
+			if (slot === "c") profiles[2].text = name;
+			if (slot === "d") profiles[3].text = name;
+			this.setState({ profiles: profiles });
+		});
 		window.ipcApi.handlePosition((event, value, yaw, pitch) => {
 			this.setState({
 				position:
@@ -238,12 +253,22 @@ export default class App extends React.Component {
 			}
 		});
 		const versions = await window.ipcApi.versions();
+		const profiles = await window.ipcApi.profiles();
+		const profiles_state = this.state.profiles;
+		if (profiles[0]) profiles_state[0].text = profiles[0];
+		if (profiles[1]) profiles_state[1].text = profiles[1];
+		if (profiles[2]) profiles_state[2].text = profiles[2];
+		if (profiles[3]) profiles_state[3].text = profiles[3];
+		this.setState({ profiles: profiles_state });
 		this.setState({ versions: versions, version: "1.20.1" });
 	}
 	componentWillUnmount() {}
 
 	handleVersionChange(event, ref) {
 		this.setState({ version: event.target.value });
+	}
+	handleProfileChange(event, ref) {
+		this.setState({ profile: event.target.value });
 	}
 	handleToChange(event, ref) {
 		this.setState({ toPlayer: event.target.value });
@@ -318,6 +343,24 @@ export default class App extends React.Component {
 								</FormControl>
 							</Grid>
 							<Grid item xs="auto">
+								<FormControl size="small">
+									<InputLabel id="select-label">Profile</InputLabel>
+									<Select
+										labelId="select-label"
+										label="Profile"
+										id="profile"
+										value={this.state.profile}
+										onChange={(event) => {
+											this.handleProfileChange(event, this);
+										}}
+									>
+										{this.state.profiles.map((line, i) => (
+											<MenuItem value={line.value}>{line.text}</MenuItem>
+										))}
+									</Select>
+								</FormControl>
+							</Grid>
+							<Grid item xs="auto">
 								<Button
 									onClick={() => {
 										onLoginButton(this.state);
@@ -333,7 +376,12 @@ export default class App extends React.Component {
 								</Button>
 							</Grid>
 							<Grid item xs="auto">
-								<Button onClick={onReauthButton} variant="contained">
+								<Button
+									onClick={() => {
+										onReauthButton(this.state);
+									}}
+									variant="contained"
+								>
 									Reauth
 								</Button>
 							</Grid>

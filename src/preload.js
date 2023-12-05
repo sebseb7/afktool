@@ -3,8 +3,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 globalThis.isElectron = true;
 
 contextBridge.exposeInMainWorld("ipcApi", {
-	login: (username, password, version) => {
-		ipcRenderer.invoke("login", [username, password, version]);
+	login: (username, password, version, profile) => {
+		ipcRenderer.invoke("login", [username, password, version, profile]);
 	},
 	look: (yaw, pitch) => {
 		ipcRenderer.invoke("look", [yaw, pitch]);
@@ -30,8 +30,9 @@ contextBridge.exposeInMainWorld("ipcApi", {
 		ipcRenderer.invoke("state", [name, value]);
 	},
 	versions: () => ipcRenderer.invoke("versions"),
+	profiles: () => ipcRenderer.invoke("profiles"),
 	logout: () => ipcRenderer.invoke("logout"),
-	reauth: () => ipcRenderer.invoke("reauth"),
+	reauth: (profile) => ipcRenderer.invoke("reauth", profile),
 	browser: (url) => {
 		require("electron").shell.openExternal(url);
 	},
@@ -59,6 +60,10 @@ contextBridge.exposeInMainWorld("ipcApi", {
 	handlePosition: (callback) => {
 		ipcRenderer.removeAllListeners("position");
 		return ipcRenderer.on("position", callback);
+	},
+	handleName: (callback) => {
+		ipcRenderer.removeAllListeners("name");
+		return ipcRenderer.on("name", callback);
 	},
 	handleHealth: (callback) => {
 		ipcRenderer.removeAllListeners("health");
