@@ -1,6 +1,6 @@
 {
   "name": "afktool",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -16,7 +16,7 @@
     "electron-is-dev": "^2.0.0",
     "electron-store": "^8.1.0",
     "html-react-parser": "^5.0.6",
-    "mineflayer": "^4.14.0",
+    "mineflayer": "github:PrismarineJS/mineflayer#mc-1.20.2",
     "mineflayer-antiafk": "github:Etiaro/mineflayer-antiafk",
     "mineflayer-auto-eat": "^3.3.6",
     "mineflayer-pathfinder": "^2.4.5",

@@ -182,6 +182,9 @@ function createWindow() {
 		bot.on("forcedMove", () => {
 			win.webContents.send("position", bot.entity.position, bot.entity.yaw, bot.entity.pitch);
 		});
+		//bot._client.on('entity_metadata', (p) => {
+		//	if(p.metadata[0].type === 'item_stack') console.log(p.metadata[0].value);
+		//})
 		bot.on("health", () => {
 			win.webContents.send("health", bot.health, bot.food);
 			if (settings.damage_logout && bot.health < 4) {
