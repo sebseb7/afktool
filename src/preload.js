@@ -69,5 +69,9 @@ contextBridge.exposeInMainWorld("ipcApi", {
 		ipcRenderer.removeAllListeners("health");
 		return ipcRenderer.on("health", callback);
 	},
+	handleEntities: (callback) => {
+		ipcRenderer.removeAllListeners("entities");
+		return ipcRenderer.on("entities", callback);
+	},
 	argv: window.process.argv,
 });

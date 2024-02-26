@@ -124,7 +124,20 @@ function createWindow() {
 					.catch((e) => {});
 			}
 			if (timer1) clearInterval(timer1);
-			timer1 = setInterval(() => {}, 50);
+			timer1 = setInterval(() => {
+
+				let list = [];
+				for (const entity of Object.values(bot.entities)) {
+					if (entity === bot.entity || !entity.type || !entity.name || entity.name === 'item_frame' || entity.name === 'glow_item_frame' || entity.name === 'item' || entity.name === 'bat') {
+						continue
+					}
+					list.push({ pos: entity.position, name: entity.name });
+					
+				}
+				win.webContents.send("entities", list);
+
+
+			}, 5000);
 			bot.inventory.on("updateSlot", (slot, old, item) => {
 				win.webContents.send("slot", slot, item && item.name, item && item.count);
 			});

@@ -34,6 +34,11 @@ import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
 import BackHandIcon from "@mui/icons-material/BackHand";
 import AirlineStopsIcon from "@mui/icons-material/AirlineStops";
 
+import { Chart as ChartJS, PointElement, Colors, Tooltip, Legend, LinearScale } from "chart.js";
+import { Scatter } from "react-chartjs-2";
+
+ChartJS.register(PointElement, Tooltip, Legend, LinearScale, Colors);
+
 const invsprite = require("./invsprite.json");
 
 const darkTheme = createTheme({
@@ -179,6 +184,9 @@ export default class App extends React.Component {
 			slot_44num: "",
 			slot_45num: "",
 			slotActive: null,
+			radar: {
+				datasets: [],
+			}
 		};
 	}
 
@@ -245,6 +253,20 @@ export default class App extends React.Component {
 		});
 		window.ipcApi.handleHealth((event, value, value2) => {
 			this.setState({ health: Math.round(value), hunger: Math.round(value2) });
+		});
+		window.ipcApi.handleEntities((event, value) => {
+			
+			let sets = {};
+			for (const entitiy of value) {
+				if (!sets[entitiy.name]) sets[entitiy.name] = [];
+				sets[entitiy.name].push({ x: entitiy.pos.x, y: entitiy.pos.z })
+			}
+			let datasets = [];
+			for (const set of Object.keys(sets).sort()) {
+				datasets.push({ label: set, data: sets[set] });
+			}
+
+			this.setState({ radar: {datasets: datasets} });
 		});
 		window.ipcApi.handlePlayers((event, value) => {
 			this.setState({ players: value });
@@ -389,7 +411,9 @@ export default class App extends React.Component {
 					</div>
 
 					<Grid container spacing={2}>
+						
 						<Grid item xs="8">
+
 							<List
 								sx={{
 									width: "100%",
@@ -401,14 +425,19 @@ export default class App extends React.Component {
 									"& ul": { padding: 0 },
 								}}
 							>
+								
 								<li key={`section`}>
 									<ul>
+										<li>
+											<Scatter options={{ plugins: { colors: { forceOverride: true } }, scales: { y: { beginAtZero: false } }, animation: false, transitions:{active:{animation:{duration:0}}} }} data={this.state.radar}/>
+										</li>
 										{this.state.list.map((line, i) => (
 											<ListItem sx={{ fontFamily: "Monospace", paddingTop: 0, paddingBottom: 0 }} key={"item_" + i}>
 												{line.type === "log" && <ListItemText sx={{ margin: 0 }} primary={line.value} />}
 											</ListItem>
 										))}
 									</ul>
+									
 								</li>
 							</List>
 						</Grid>
